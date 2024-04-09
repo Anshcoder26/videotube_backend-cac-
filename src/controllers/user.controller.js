@@ -4,6 +4,9 @@ import { User} from "../models/user.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+
+//generation of access and refresh token
+
 const generateAccessandRefreshTokens = async(userId) => {
     try {
        const user= await User.findById(userId)
@@ -20,6 +23,8 @@ const generateAccessandRefreshTokens = async(userId) => {
         throw new ApiError(500, "Something went wrong while generating access and refresh tokens")
     }
 }
+
+//register user
 
 const registerUser= asyncHandler( async (req, res)=> {
     // get user details from frontend
@@ -94,7 +99,6 @@ const registerUser= asyncHandler( async (req, res)=> {
 
 } )
 
-
 //login user
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -151,16 +155,36 @@ const loginUser = asyncHandler(async (req, res) => {
 
 })
 
+//logout user
+
 const logoutUser = asyncHandler(async(req, res) => {
-    
+    User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                refreshToken: undefined
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res
+    .status(200)
+    .clearCookie("accessToken",options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User Logged out successfully"))
 })
-
-
-
 
 
 export {
     registerUser,
-    loginUser
-
+    loginUser,
+    logoutUser
 }
