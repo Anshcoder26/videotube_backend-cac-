@@ -5,8 +5,6 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
-
-
 //generation of access and refresh token
 
 const generateAccessAndRefreshTokens = async(userId) =>{
@@ -231,7 +229,6 @@ const refreshAccessToken = asyncHandler(async(req, res) => {
    }
 
 })
-
 
 export {
     registerUser,
