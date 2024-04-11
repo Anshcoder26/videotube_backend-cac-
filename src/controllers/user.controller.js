@@ -158,12 +158,13 @@ const loginUser = asyncHandler(async (req, res) => {
 
 //logout user
 
+
 const logoutUser = asyncHandler(async(req, res) => {
     User.findByIdAndUpdate(
         req.user._id,
         {
             $set:{
-                refreshToken: undefined
+                refreshToken: 1
             }
         },
         {
@@ -218,7 +219,7 @@ const refreshAccessToken = asyncHandler(async(req, res) => {
      .status(200)
      .cookie("accessToken", accessToken, options)
      .cookie("refreshToken", newrefreshToken, options)
-     .josn(
+     .json(
          new ApiResponse(
              200,
              {accessToken, refreshToken: newrefreshToken},
@@ -376,7 +377,7 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
                 from: "subcriptions",
                 localField: "_id",
                 foreignField: "subscriber",
-                as: "subscriberedTo"
+                as: "subscribedTo"
             }
         },
         {
@@ -410,7 +411,7 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
         }
     ])
 
-    if(channel?.length) {
+    if(!channel?.length) {
         throw new ApiError(404, "channel does not exist")
     }
 
