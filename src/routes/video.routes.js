@@ -19,6 +19,6 @@ router.route("/publish-video").post(
 
 router.route("/c/:videoId").get(getVideoById)
 
-router.route("/updateVideo").patch(updateVideo)
+router.route("/updateVideo/:videoId").patch(updateVideo)
 
 export default router

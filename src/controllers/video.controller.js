@@ -66,18 +66,28 @@ const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
 
     const video = await Video.findById(
-        req.video?.title
+        videoId
     )
+
+    if(!video) {
+        throw new ApiError(404, "Video not found")
+    }
+
+    const responseData = {
+        title: video.title,
+        description: video.description
+    }
 
     return res
     .status(200)
-    .json(new ApiResponse(200, video,"Video found successfully"))
+    .json(new ApiResponse(200, responseData ,"Video found successfully"))
     
     
 })
 
 const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+
     //TODO: update video details like title, description, thumbnail
     const {title, description} =  req.body
 
@@ -86,7 +96,7 @@ const updateVideo = asyncHandler(async (req, res) => {
     }
 
     const video = await Video.findByIdAndUpdate(
-        req.video?._id,
+        videoId,
         {
             $set: {
                 title,
@@ -96,15 +106,25 @@ const updateVideo = asyncHandler(async (req, res) => {
         {new: true}
     )
 
+    if(!video){
+        throw new ApiError(404, "No video which this id was found")
+    }
+
+    const responseData = {
+        title: video.title,
+        description: video.description
+    }
+
     return res
     .status(200)
-    .json(new ApiResponse(200, video, "Video details updated successfully"))
+    .json(new ApiResponse(200, responseData, "Video details updated successfully"))
 
 })
 
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: delete video
+    
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
