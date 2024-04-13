@@ -1,108 +1,60 @@
-import mongoose, {isValidObjectId} from "mongoose"
-import {Video} from "../models/video.model.js"
-import {User} from "../models/user.model.js"
+import { asyncHandler } from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/ApiError.js"
-import {ApiResponse} from "../utils/ApiResponse.js"
-import {asyncHandler} from "../utils/asyncHandler.js"
-import {uploadOnCloudinary} from "../utils/cloudinary.js"
+import { Video} from "../models/video.model.js"
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken";
+import { mongoose } from "mongoose";
 
+const publishAVideo = asyncHandler(async(req, res)=> {
+    const {title, description} = req.body
 
-/*const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
-    //TODO: get all videos based on query, sort, pagination
-})*/
-
-const publishAVideo = asyncHandler(async (req, res) => {
-    const { title, description} = req.body
-    
-    if(!title || !description){
-        throw new ApiError(400, "Title and description are required.");
+    if(!(title && description)){
+        throw new ApiError (400, "No title and descriptionis required")
     }
+
     const existedVideo = await Video.findOne({
         $or: [{title}, {description}]
     })
 
-    if(existedVideo){
-        throw new ApiError(409, "Video with title or description already exists")
+    if (existedVideo) {
+        throw new ApiError(409, "Video with title and description already exists")
     }
 
-    const videoLocalPath = req.files?.videoFile[0]?.path;
-    const thumbnailLocalPath = req.files?.thumbnail[0]?.path;
-
-    if (!videoLocalPath) {
-        throw new ApiError(400, "Video file is required")
+    const videoFileLocalPath = req.files.videoFile[0].path;
+    const thumbnailLocalPath = req.files.thumbnail[0].path;
+    
+    if(!videoFileLocalPath){
+        throw new ApiError(400, "Video file or thumbnail is not provided")
     }
 
-    if (!thumbnailLocalPath) {
-        throw new ApiError(400, "Thumbnail file is required")
-    }
-
-    const videoFile = await uploadOnCloudinary(videoLocalPath)
+    const videoFile = await uploadOnCloudinary(videoFileLocalPath)
     const thumbnail = await uploadOnCloudinary(thumbnailLocalPath)
 
-    if(!videoFile){
-        throw new ApiError(400, "Video file is required")
-    }
-
-    if(!thumbnail){
-        throw new ApiError(400, "Thumbnail file is required")
+    if(!videoFile && !thumbnail){
+        throw new ApiError(400, "Error while uploading on cloudinary")
     }
 
     const newVideo = await Video.create({
         title,
-        video: videoFile?.url,
-        thumbnail: thumbnail?.url,
+        videoFile: videoFile.url,
+        thumbnail: thumbnail.url,
         description,
+        
     })
 
-    const createdVideo = await Video.findById(newVideo._id);
+    const createdVideo = await Video.findById(newVideo._id)
 
     if(!createdVideo){
-        throw new ApiError(500, "Something went wrong while publishing the video")  
+        throw new ApiError(500, "Something went wrong while creating the video")
     }
 
-    return res.status(201)
-          .json(new ApiResponse(201,
-              {
-                  ...video._doc,
-                  videoFile: videoFile?.url, // Only send the URL of the video file
-                  thumbnail: thumbnail?.url    // Only send the URL of the thumbnail
-              },
-              "Video Published Successfully"
-          ))
-
-    
-    
-
-
-    // TODO: get video, upload to cloudinary, create video
-})
-
-/*const getVideoById = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-    //TODO: get video by id
-})
-
-const updateVideo = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-    //TODO: update video details like title, description, thumbnail
+    return res.status(201).json(
+        new ApiResponse(200, createdVideo, "Video Published successfully")
+    )
 
 })
 
-const deleteVideo = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-    //TODO: delete video
-})
-
-const togglePublishStatus = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-})*/
-
-export {
-    //getAllVideos,
-    publishAVideo,
-    //getVideoById,
-    //updateVideo,
-    //deleteVideo,
-    //togglePublishStatus
+export{
+    publishAVideo
 }
