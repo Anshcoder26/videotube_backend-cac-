@@ -6,6 +6,12 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import { mongoose } from "mongoose";
 
+const getAllVideos = asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
+    //TODO: get all videos based on query, sort, pagination
+})
+
+
 const publishAVideo = asyncHandler(async(req, res)=> {
     const {title, description} = req.body
 
@@ -55,6 +61,59 @@ const publishAVideo = asyncHandler(async(req, res)=> {
 
 })
 
+
+const getVideoById = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+
+    const video = await Video.findById(
+        req.video?.title
+    )
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, video,"Video found successfully"))
+    
+    
+})
+
+const updateVideo = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+    //TODO: update video details like title, description, thumbnail
+    const {title, description} =  req.body
+
+    if(!title || !description){
+        throw new ApiError(400, "All fields are required")
+    }
+
+    const video = await Video.findByIdAndUpdate(
+        req.video?._id,
+        {
+            $set: {
+                title,
+                description
+            }
+        },
+        {new: true}
+    )
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, video, "Video details updated successfully"))
+
+})
+
+const deleteVideo = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+    //TODO: delete video
+})
+
+const togglePublishStatus = asyncHandler(async (req, res) => {
+    const { videoId } = req.params
+})
+
 export{
-    publishAVideo
+    publishAVideo,
+    getVideoById,
+    updateVideo
+
 }
