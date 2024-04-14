@@ -11,5 +11,6 @@ const router = Router();
 router.route("/addComment/:videoId").post(addComment);
 router.route("/:videoId").get(getVideoComments);
 router.route("/deleteComment/:commentId").delete(deleteComment);
+router.route("/updateComment/:commentId").patch(updateComment);
 
 export default router

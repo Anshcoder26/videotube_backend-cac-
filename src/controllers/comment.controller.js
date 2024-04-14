@@ -60,7 +60,39 @@ const addComment = asyncHandler(async (req, res) => {
 
 
 const updateComment = asyncHandler(async (req, res) => {
+    const{commentId} = req.params
+    
+    const {content} = req.body
+
+    if(!content){
+        throw new ApiError(400, "All fields are required")
+    }
+
+    const comment = await Comment.findByIdAndUpdate(
+        commentId,
+        {
+            $set:{
+                content
+            }
+        },
+        {new: true}
+    )
+
+    if(!comment){
+        throw new ApiError(404, "No comment which this id was found")
+    }
+
+    const responseData = {
+        commentId: comment._id,
+        content: comment.content
+    }
     // TODO: update a comment
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, responseData, "Comment Updated successfully"));
+
+
 })
 
 const deleteComment = asyncHandler(async (req, res) => {
