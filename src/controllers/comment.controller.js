@@ -43,6 +43,7 @@ const addComment = asyncHandler(async (req, res) => {
 
         // Prepare response data
         const responseData = {
+            commentId: comment._id,
             title: video.title,
             content: comment.content, // Accessing the content of the saved comment
         };
@@ -64,6 +65,19 @@ const updateComment = asyncHandler(async (req, res) => {
 
 const deleteComment = asyncHandler(async (req, res) => {
     // TODO: delete a comment
+    const { commentId} = req.params
+
+    const comment = await Comment.findByIdAndDelete(
+        commentId
+    )
+
+    if(!comment){
+        throw new ApiError(500, "No comment was found")
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Comment deleted successfully"));
 })
 
 export {
