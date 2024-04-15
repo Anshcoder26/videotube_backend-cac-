@@ -91,11 +91,10 @@ const updateComment = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(new ApiResponse(200, responseData, "Comment Updated successfully"));
-
-
 })
 
 const deleteComment = asyncHandler(async (req, res) => {
+    
     // TODO: delete a comment
     const { commentId} = req.params
 
